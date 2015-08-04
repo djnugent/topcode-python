@@ -7,8 +7,8 @@ from TopCode import TopCode
 scan = Scanner()
 
 
-cam = cv2.VideoCapture()
-cam.open(0)
+cam = cv2.VideoCapture(0)
+
 
 if not cam.isOpened:
 	raise Exception("No camera detected!")

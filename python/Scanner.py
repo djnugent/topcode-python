@@ -70,7 +70,6 @@ class Scanner(object):
 
 	  	''' Maximum width of a TopCode unit in pixels '''
 	  	self.maxu = 80
-	  	self.q = 0
 
 
 	'''
@@ -89,6 +88,8 @@ class Scanner(object):
 		else:
 			self.image = image
 
+		if len(self.image.shape) < 3: 
+			self.iamge = cv2.cvtColor(self.image,cv2.COLOR_GRAY2RGB)
 
 		self.preview = None
 		self.w = self.image.shape[1]
@@ -107,7 +108,6 @@ class Scanner(object):
 			for x in range(0,self.w):
 				b,g,r = image[y][x]
 				pixel = (0xFF << 24) | ((r & 0xFF) << 16) | ((g & 0xFF) << 8) | (b & 0xFF)
-				#pixel = ((r & 0xFF) << 16) | ((g & 0xFF) << 8) | (b & 0xFF)
 				data[y * self.w + x] = pixel
 		return data
 

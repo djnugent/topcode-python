@@ -45,17 +45,6 @@ import numpy as np
 
 
 
-
-
-'''
-TODO: 
-self.self.cores needs to be a numpy list
-annotate() needs a graphical interface
-draw() needs a graphical interface
-numpy array required for generateCodes()
-'''
-
-
 class TopCode(object):
    
 
