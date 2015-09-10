@@ -1,23 +1,23 @@
 '''
  * @(#) Scanner.py
- * 
+ *
  * Tangible Object Placement Codes (TopCodes)
  * Copyright (c) 2007 Michael S. Horn
- * 
+ *
  *		   Michael S. Horn (michael.horn@tufts.edu)
  *		   Tufts University Computer Science
  *		   161 College Ave.
  *		   Medford, MA 02155
- * 
+ *
  * This program is free software you can redistribute it and/or modify
  * it under the terms of the GNU General def License (version 2) as
  * published by the Free Software Foundation.
- * 
+ *
  * This program is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * General def License for more details.
- * 
+ *
  * You should have received a copy of the GNU General def License
  * along with this program if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
@@ -27,6 +27,7 @@ import math
 import cv2
 import numpy as np
 from TopCode import TopCode
+import time
 
 '''
  * Loads and scans images for TopCodes.  The algorithm does a single
@@ -41,8 +42,8 @@ from TopCode import TopCode
 
 class Scanner(object):
 
-	
-   
+
+
 	'''
 	* Default constructor
 	'''
@@ -88,8 +89,9 @@ class Scanner(object):
 		else:
 			self.image = image
 
-		if len(self.image.shape) < 3: 
-			self.iamge = cv2.cvtColor(self.image,cv2.COLOR_GRAY2RGB)
+		if len(self.image.shape) < 3:
+			self.image = cv2.cvtColor(self.image,cv2.COLOR_GRAY2RGB)
+
 
 		self.preview = None
 		self.w = self.image.shape[1]
@@ -97,6 +99,7 @@ class Scanner(object):
 		self.data = self.getRGB(self.image)
 
 		self.threshold()		  # run the adaptive threshold filter
+
 		return self.findCodes()   # scan for topcodes
 
 	'''
@@ -104,8 +107,8 @@ class Scanner(object):
 	'''
 	def getRGB(self, image):
 		data = np.zeros([self.w*self.h], dtype=np.int32)
-		for y in range(0, self.h):
-			for x in range(0,self.w):
+		for y in xrange(0, self.h):
+			for x in xrange(0,self.w):
 				b,g,r = image[y][x]
 				pixel = (0xFF << 24) | ((r & 0xFF) << 16) | ((g & 0xFF) << 8) | (b & 0xFF)
 				data[y * self.w + x] = pixel
@@ -113,7 +116,7 @@ class Scanner(object):
 
 
 	'''
-	Returns the original (unaltered) image   
+	Returns the original (unaltered) image
 	'''
   	def getImage(self):
 	 	return self.image
@@ -132,7 +135,7 @@ class Scanner(object):
 	'''
   	def getImageHeight(self):
 	 	return self.h
-   
+
 
 	'''
 	Sets the maximum allowable diameter (in pixels) for a TopCode
@@ -148,7 +151,7 @@ class Scanner(object):
 	 	f = diameter / 8.0
 	 	self.maxu = int(math.ceil(f))
 
-   
+
 	'''
 	Returns the number of candidate topcodes found during a scan
 	'''
@@ -164,54 +167,54 @@ class Scanner(object):
 
 
 	'''
-	Binary (thresholded black/white) value for pixel (x,y)   
+	Binary (thresholded black/white) value for pixel (x,y)
 	'''
   	def getBW(self, x, y):
 	 	pixel = self.data[y * self.w + x]
 	 	return (pixel >> 24) & 0x01
 
-   
+
 	'''
 	Average of thresholded pixels in a 3x3 region around (x,y).
-	Returned value is between 0 (black) and 255 (white).   
+	Returned value is between 0 (black) and 255 (white).
 	'''
   	def getSample3x3(self, x, y):
 	 	if (x < 1 or x > (self.w-2) or y < 1 or y >= (self.h-2)):
 	 		return 0
 	 	pixel, sum = 0, 0
-	 	
-	 	for j in range(y-1,y+2):
-	 		for i in range(x-1,x+2):
+
+	 	for j in xrange(y-1,y+2):
+	 		for i in xrange(x-1,x+2):
 				pixel = self.data[j * self.w + i]
 				if ((pixel & 0x01000000) > 0):
 				   sum += 0xff
 	  	#return (sum >= 5) ? 1 : 0
 	  	return int(sum / 9)
 
-   
+
 	'''
 	Average of thresholded pixels in a 3x3 region around (x,y).
 	Returned value is either 0 (black) or 1 (white).
 	'''
-  	def getBW3x3(self, x, y): 
+  	def getBW3x3(self, x, y):
 	 	if (x < 1 or x > (self.w-2) or y < 1 or y >= (self.h-2)):
 	 		return 0
 	 	pixel, sum = 0, 0
-	  
-	 	for j in range(y-1,y+2,1):
-	 		for i in range(x-1,x+2):
+
+	 	for j in xrange(y-1,y+2,1):
+	 		for i in xrange(x-1,x+2):
 				pixel = self.data[j * self.w + i]
 				sum += ((pixel >> 24) & 0x01)
 
 		return 1 if (sum >= 5) else 0
 
-   
-   
+
+
 	'''
 	Perform Wellner adaptive thresholding to produce binary pixel
 	data.  Also mark candidate spotcode locations.
- 
-	"Adaptive Thresholding for the DigitalDesk"   
+
+	"Adaptive Thresholding for the DigitalDesk"
 	EuroPARC Technical Report EPC-93-110
 	'''
  	def threshold(self):
@@ -223,7 +226,7 @@ class Scanner(object):
 	 	b1, w1, b2, level, dk = 0, 0, 0, 0, 0
 
 	 	self.ccount = 0
-	 	for j in range(0, self.h):
+	 	for j in xrange(0, self.h):
 			level = b1 = b2 = w1 = 0
 
 			#----------------------------------------
@@ -232,9 +235,9 @@ class Scanner(object):
 			#----------------------------------------
 			k = 0 if (j % 2 == 0) else (self.w-1)
 			k += (j * self.w)
-		 
-			for i in range(0,self.w):
-			 
+
+			for i in xrange(0,self.w):
+
 				#----------------------------------------
 				# Calculate pixel intensity (0-255)
 				#----------------------------------------
@@ -244,13 +247,13 @@ class Scanner(object):
 				b = pixel & 0xff
 				a = (r + g + b) / 3
 				#a = r
-				
+
 				#----------------------------------------
 				# Calculate sum as an approximate sum
 				# of the last s pixels
 				#----------------------------------------
 				sum += a - (sum / s)
-			 
+
 				#----------------------------------------
 				# Factor in sum from the previous row
 				#----------------------------------------
@@ -258,8 +261,8 @@ class Scanner(object):
 				   threshold = (sum + (self.data[k-self.w] & 0xffffff)) / (2*s)
 				else:
 				   threshold = sum / s
-				
-				
+
+
 
 				#----------------------------------------
 				# Compare the average sum to current pixel
@@ -269,15 +272,15 @@ class Scanner(object):
 				f = 0.975
 				a = 0 if (a < threshold * f) else 1
 
-				
+
 
 				#----------------------------------------
-				# Repack pixel data with binary data in 
+				# Repack pixel data with binary data in
 				# the alpha channel, and the running sum
 				# for this pixel in the RGB channels
 				#----------------------------------------
 				self.data[k] = (a << 24) + (sum & 0xffffff)
-				   
+
 				# On a white region. No black pixels yet
 				if level == 0:
 				  	if (a == 0):  # First black encountered
@@ -285,7 +288,7 @@ class Scanner(object):
 					 	b1 = 1
 					 	w1 = 0
 					 	b2 = 0
-	  
+
 				# On first black region
 				elif level == 1:
 				  	if (a == 0):
@@ -293,8 +296,8 @@ class Scanner(object):
 				  	else:
 					 	level = 2
 					 	w1 = 1
-				  
-				   
+
+
 
 				# On second white region (bulls-eye of a code?)
 				elif level == 2:
@@ -303,9 +306,9 @@ class Scanner(object):
 					 	b2 = 1
 				  	else:
 					 	w1 += 1
-				  
-				   
-				   
+
+
+
 				# On second black region
 				elif level == 3:
 				  	if (a == 0):
@@ -319,26 +322,26 @@ class Scanner(object):
 
 							dk = 1 + b2 + w1/2
 							if (j % 2 == 0):
-								dk = k - dk 
+								dk = k - dk
 							else:
 								dk = k + dk
-						 
+
 							self.data[dk - 1] |= mask
 							self.data[dk] |= mask
 							self.data[dk + 1] |= mask
 							self.ccount += 3  # count candidate codes
-					  
+
 					 	b1 = b2
 					 	w1 = 1
 					 	b2 = 0
 					 	level = 2
 
 				k += 1 if (j % 2 == 0) else -1
-	  
-   
+
+
 
 	'''
-	Scan the image line by line looking for TopCodes   
+	Scan the image line by line looking for TopCodes
 	'''
   	def findCodes(self):
 	 	self.tcount = 0
@@ -346,14 +349,14 @@ class Scanner(object):
 
 	 	spot = TopCode()
 	 	k = self.w * 2
-	 	for j in range(2, self.h-2):
-	 		for i in range(0,self.w):
+	 	for j in xrange(2, self.h-2):
+	 		for i in xrange(0,self.w):
 				if ((self.data[k] & 0x2000000) > 0):
 					if ((self.data[k-1] & 0x2000000) > 0 and (self.data[k+1] & 0x2000000) > 0 and (self.data[k-self.w] & 0x2000000) > 0 and (self.data[k+self.w] & 0x2000000) > 0):
 						'''
 				  		if ((self.data[k-self.w] & 0x2000000) > 0 or
 					  	(self.data[k+self.w] & 0x2000000) > 0)):
-						'''	
+						'''
 
 						if (not self.overlaps(spots, i, j)):
 							self.tcount += 1
@@ -367,18 +370,18 @@ class Scanner(object):
 
 
 	'''
-	Returns True if point (x,y) is in an existing TopCode bullseye   
+	Returns True if point (x,y) is in an existing TopCode bullseye
 	'''
   	def overlaps(self, spots, x, y):
 		for top in spots:
 			if (top.inBullsEye(x, y)):
 				return True
 	 	return False
-   
-   
+
+
 	'''
 	Counts the number of vertical pixels from (x,y) until a color
-	change is perceived. 
+	change is perceived.
 	'''
   	def ydist(self, x, y, d):
 	 	sample = 0
@@ -390,32 +393,32 @@ class Scanner(object):
 				return (j-y) if (d > 0) else (y - j)
 			j+=d
 		return -1
-	 	
 
-   
+
+
 	'''
 	Counts the number of horizontal pixels from (x,y) until a color
-	change is perceived. 
+	change is perceived.
 	'''
   	def xdist(self, x, y, d):
 	 	sample = 0
 	 	start = self.getBW3x3(x, y)
-	  
+
 	 	i = x + d
 	 	while(i > 1 and i < self.w -1):
 			sample = self.getBW3x3(i, y)
-			if (start + sample == 1): 
+			if (start + sample == 1):
 				return (i -x) if (d > 0) else (x - i)
 			i+=d
 	  	return -1
 
-   
-	#   def markTest(int x, int y): 
+
+	#   def markTest(int x, int y):
 	#	  Graphics2D g = (Graphics2D)getImage().getGraphics()
 	#	  g.setColor(Color.red)
 	#	  g.fillRect(x - 1, y - 1, 3, 3)
 
-   
+
 	'''
 	For debugging purposes, create a black and white image that
 	shows the result of adaptive thresholding.
@@ -424,8 +427,8 @@ class Scanner(object):
 	 	self.preview = np.zeros((self.h,self.w,3),np.uint8)
 
 	 	k = 0
-	 	for j in range(0, self.h):
-	 		for i in range(0,self.w):
+	 	for j in xrange(0, self.h):
+	 		for i in xrange(0,self.w):
 	 			pixel = (self.data[k]>> 24)
 	 			k+=1
 				if (pixel == 0):
@@ -446,4 +449,3 @@ class Scanner(object):
 				self.preview[j][i] =  (b,g,r)
 
 	 	return self.preview
-

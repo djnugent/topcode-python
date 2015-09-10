@@ -196,8 +196,8 @@ class TopCode(object):
         | confidence reading...                   |
         ------------------------------------------
           '''
-        for u in range(-2,3):
-            for a in range(0,10):
+        for u in xrange(-2,3):
+            for a in xrange(0,10):
                 arca = a * self.ARC * 0.1
                 c = self.readCode(scanner,self.unit + (self.unit * 0.05 * u), arca)
                 if( c > maxc):
@@ -231,11 +231,11 @@ class TopCode(object):
         bit, bits = 0, 0
         self.code = -1
         
-        for sector in range(self.SECTORS - 1, -1, -1):
+        for sector in xrange(self.SECTORS - 1, -1, -1):
             dx = math.cos(self.ARC * sector + arca)
             dy = math.sin(self.ARC * sector + arca)
             # Take 8 samples across the diameter of the symbol
-            for i in range(0, self.WIDTH):
+            for i in xrange(0, self.WIDTH):
                 dist = (i - 3.5) * unit
                 sx = int(round(self.x + float(dx) * dist))
                 sy = int(round(self.y + float(dy) * dist))
@@ -290,7 +290,7 @@ class TopCode(object):
       
         self.orientation = 0
 
-        for i in range(1, self.SECTORS + 1):
+        for i in xrange(1, self.SECTORS + 1):
             bits = (((bits << 1) & mask) | (bits >> (self.SECTORS - 1)))
             if (bits < min): 
                 min = bits
@@ -305,7 +305,7 @@ class TopCode(object):
     '''
     def checksum(self, bits):
         sum = 0
-        for i in range(0,self.SECTORS):
+        for i in xrange(0,self.SECTORS):
             sum += (bits & 0x01)
             bits = bits >> 1
         return (sum == 5)
@@ -392,13 +392,13 @@ class TopCode(object):
         sx, sy = 0,0
         bits = 0
 
-        for sector in range(self.SECTORS -1, -1, -1):
+        for sector in xrange(self.SECTORS -1, -1, -1):
             dx = math.cos(self.ARC * sector + orientation)
             dy = math.sin(self.ARC * sector + orientation)
       
             # Take 8 samples across the diameter of the symbol
             sample = 0
-            for i in range(3,self.WIDTH):
+            for i in xrange(3,self.WIDTH):
                 dist = (i - 3.5) * self.unit
 
                 sx = int(round(x + dx * dist))
@@ -431,7 +431,7 @@ class TopCode(object):
         g.setColor(Color.white)
         g.fill(circ)
       
-        for i in range(self.SECTORS - 1, -1, -1):
+        for i in xrange(self.SECTORS - 1, -1, -1):
             arc.setArc(x - r, y - r, r * 2, r * 2, i * sweep + sweepa, sweep, Arc2D.PIE)
             g.setColor(Color.white if ((bits & 0x1) > 0) else Color.black)
             g.fill(arc)
@@ -458,7 +458,7 @@ class TopCode(object):
     integer.    
     '''
     def printBits(self, bits):
-        for i in range(self.SECTORS-1, -1, -1):
+        for i in xrange(self.SECTORS-1, -1, -1):
             if (((bits>>i) & 0x01) == 1):
                 print "1"
             else:
